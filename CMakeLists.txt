@@ -8,6 +8,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 Find_Package(Eigen3 REQUIRED)
 ############### source and test ######################
-include_directories(${EIGEN3_INCLUDE_DIR} ${CHOLMOD_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/ceres)
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/include/common)
 add_subdirectory(src)
+AUX_SOURCE_DIRECTORY(src DIR_SRCS)

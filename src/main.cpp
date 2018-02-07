@@ -7,6 +7,7 @@
 #include <fstream>
 #include "../include/common/BundleParams.h"
 #include "../include/data_package.h"
+#include "../include/ekf_core.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -92,9 +93,49 @@ void process_EKF(ifstream& in_file_, ofstream& out_file_, BundleParams& params) 
 
     getDataPackage(in_file_, measurement_pack_list, gt_pack_list);
 
+    EKFCore kalman;
+    vector<VectorXd> estimations;
+    vector<VectorXd> ground_truth;
 
+    size_t data_size = measurement_pack_list.size();
+    if (data_size > 0) {
+        kalman.initData(measurement_pack_list[0]);
+        for (int i = 0; i < data_size; i++) {
 
+            MeasurementPackage data = measurement_pack_list[i];
+            kalman.ProcessData(data);
 
+            KalmanFilter filter = kalman.getFilter();
+
+            out_file_ << filter.x_(0) << "\t";
+            out_file_ << filter.x_(1) << "\t";
+            out_file_ << filter.x_(2) << "\t";
+            out_file_ << filter.x_(3) << "\t";
+
+            if (data.sensor_type_ == MeasurementPackage::LASER) {
+                // output the estimation
+                out_file_ << data.raw_measurements_(0) << "\t";
+                out_file_ << data.raw_measurements_(1) << "\t";
+            } else if (data.sensor_type_ == MeasurementPackage::RADAR) {
+                // output the estimation in the cartesian coordinates
+                float ro = data.raw_measurements_(0);
+                float phi = data.raw_measurements_(1);
+                out_file_ << ro * cos(phi) << "\t"; // p1_meas
+                out_file_ << ro * sin(phi) << "\t"; // ps_meas
+            }
+
+            out_file_ << gt_pack_list[i].gt_values_(0) << "\t";
+            out_file_ << gt_pack_list[i].gt_values_(1) << "\t";
+            out_file_ << gt_pack_list[i].gt_values_(2) << "\t";
+            out_file_ << gt_pack_list[i].gt_values_(3) << "\n";
+            estimations.push_back(filter.x_);
+            ground_truth.push_back(gt_pack_list[i].gt_values_);
+        }
+
+        Tools tools;
+        // 均方根误差
+        cout << "RMSE" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+    }
 }
 
 int main(int argc, char **argv) {
