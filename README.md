@@ -28,6 +28,7 @@
 **k+1|k** 先验预测步长。根据k时的先验数据，预测k+1时的位姿（此时未参考传感器真实测量数据）
 
 * **Prediction**
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/kalman-prediction.jpg)
 
     **x'** 预测后的状态向量分布均值。
@@ -40,6 +41,7 @@
     由于实际物体可能会有加速、减速，所以P'服从ν〜N（0，Q）的高斯分布，以描述这种预测的不确定性。
     ```
 * **Update**
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/kalman-update.jpg)
 
     ```
@@ -52,9 +54,12 @@
 ### 扩展kalman
 有时我们采集的数据来自多种传感器，其中有些传感器数据和噪声并不服从高斯分布，由于高斯分布经过非线性变换后，不再是高斯分布，所以到时上述的kalman方程无法递推下去。
 于是EKF使用高斯分布的近似去模拟非线性数据，并在k时刻进行线性计算。
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/ekf-eqution.jpg)
+
 这是在k处的1阶泰勒展开，以近似模拟k-1到k的非线性变化。
 下图为扩展kalman与传统kalman在计算上的区别：
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/efk.jpg)
 
 其中：**x'=f(x,u)** 为k-1出的先验数据(u=0)，h(x')为非线性转换函数转换后的预测值。Hj为雅可比矩阵，是一阶泰勒展开的系数矩阵。
@@ -64,12 +69,14 @@
 ### 激光雷达数据
 激光雷达返回的数据通常是点云数据(x,y,z)，本示例所输入的激光数据是经过转换后的物体中心坐标和速度2维向量等物体运动状态。
 所以我们建立预测数据等式：
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/linaer-conversation.jpg)
 
 ```$xslt
 其中预测噪声示例中忽略为0，读者可以后续添加高斯随机噪声。
 ```
 同时运动状态方程的噪声协方差为：
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/gaussian-distribution.jpg)
 
 随后通过计算kalman增益K, 对预测的状态向量进行调整，得出最终的预测xk和Pk。
@@ -79,6 +86,7 @@
 与激光雷达相比，雷达的空间分辨率更低，但是雷达能够提供径向速度信息。因此我们通常需要聚合激光雷达与雷达数据。
 但是雷达数据往往只会得到距离和角度，并且与激光雷达数据是无法线性转换的，所以这就需要设计一个新的卡尔曼滤波方程。
 雷达返回的数据如下所示：
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/radar-data.jpg)
 
 **ρ** 与观测障碍物的距离。
@@ -90,8 +98,11 @@
 我们需要将先验的数据先从极坐标转换为笛卡尔坐标。
 
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/hx.jpg)
+
 观察发现，这个转换过程并不是一个线性转换。然后我们计算雅可比矩阵Hj：
+
 ![image](https://github.com/fy2462/Expand-kalman/blob/master/image/jacobian.jpg)
+
 其余与传统kalman过程类似，最终我们得到k时刻的xk和Pk。
 
 ## 数据文件描述
