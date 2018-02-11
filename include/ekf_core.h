@@ -41,8 +41,8 @@ private:
     // x vector jacobian matrix
     Eigen::MatrixXd Hj_;
 
-    Eigen::MatrixXd F_;
-    Eigen::MatrixXd Q_;
+    Eigen::MatrixXd StateTrans_;
+    Eigen::MatrixXd AccCovariance_;
     Eigen::MatrixXd P_;
     Eigen::VectorXd x_;
 

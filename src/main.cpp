@@ -133,7 +133,7 @@ void process_EKF(ifstream& in_file_, ofstream& out_file_, BundleParams& params) 
         }
 
         Tools tools;
-        // 均方根误差
+        // Root mean square error
         cout << "RMSE" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
     }
 }

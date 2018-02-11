@@ -15,22 +15,22 @@ EKFCore::EKFCore() : is_initialized_(false),
                      R_radar_(MatrixXd(3, 3)),
                      H_laser_(MatrixXd(2, 4)),
                      Hj_(MatrixXd(3, 4)),
-                     F_(MatrixXd(4, 4)),
-                     Q_(MatrixXd(4, 4)),
+                     StateTrans_(MatrixXd(4, 4)),
+                     AccCovariance_(MatrixXd(4, 4)),
                      P_(MatrixXd(4, 4)),
                      x_(VectorXd(4)) {
 
     R_laser_ << 0.0225, 0,
                 0, 0.0225;
 
+    H_laser_ << 1, 0, 0, 0,
+            0, 1, 0, 0;
+
     R_radar_ << 0.09, 0, 0,
                 0, 0.0009, 0,
                 0, 0, 0.09;
 
-    H_laser_ << 1, 0, 0, 0,
-                0, 1, 0, 0;
-
-    F_ << 1, 0, 1, 0,
+    StateTrans_ << 1, 0, 1, 0,
           0, 1, 0, 1,
           0, 0, 1, 0,
           0, 0, 0, 1;
@@ -44,7 +44,7 @@ EKFCore::EKFCore() : is_initialized_(false),
     x_ << 1, 1, 1, 1;
 
     // initialize variables in Kalman Filter
-    ekf_.Init(x_, P_, F_, H_laser_, R_laser_, Q_);
+    ekf_.Init(x_, P_, StateTrans_, H_laser_, R_laser_, AccCovariance_);
 
     tools = Tools();
 }
@@ -59,14 +59,15 @@ void EKFCore::ProcessData(const MeasurementPackage &measurement_pack) {
     float dt = (incoming - previous_timestamp_) / 1000000.0;
     previous_timestamp_ = incoming;
 
-    ekf_.F_(0, 2) = dt;
-    ekf_.F_(1, 3) = dt;
+    ekf_.StateTrans_(0, 2) = dt;
+    ekf_.StateTrans_(1, 3) = dt;
 
     double dt_2 = dt * dt;
     double dt_3 = dt_2 * dt;
     double dt_4 = dt_3 * dt;
 
-    ekf_.Q_ << dt_4 / 4 * noise_ax_, 0, dt_3 / 2 * noise_ax_, 0,
+    // 加速度偏差
+    ekf_.AccCovariance_ << dt_4 / 4 * noise_ax_, 0, dt_3 / 2 * noise_ax_, 0,
             0, dt_4 / 4 * noise_ay_, 0, dt_3 / 2 * noise_ay_,
             dt_3 / 2 * noise_ax_, 0, dt_2 * noise_ax_, 0,
             0, dt_3 /2 * noise_ay_, 0, dt_2 * noise_ay_;

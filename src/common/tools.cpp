@@ -51,9 +51,10 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
                 0, 0, 0, 0,
                 0, 0, 0, 0;
     } else {
+        // target disdance
         float root_combo = std::sqrt(combo);
         float combo_15 = std::pow(combo, 1.5);
-
+        // First-Order Taylor Expansion
         Hj << px/root_combo, py/root_combo, 0, 0,
                 -py/combo, px/combo, 0, 0,
                 py*(vx*py - vy*px) / combo_15, px*(vy*px - vx*py) / combo_15, px/root_combo, py/root_combo;
