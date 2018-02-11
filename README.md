@@ -18,3 +18,5 @@
    预测数据与真实数据进行比较，得出下一个次循环所需的协方差矩阵等变量，重复2-3即可持续工作。
    
 ### 计算流程
+
+![image](https://github.com/fy2462/Expand-kalman/blob/master/image/prediction-update.jpg)
