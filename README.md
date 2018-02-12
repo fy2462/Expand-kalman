@@ -36,8 +36,9 @@
 **P'** 预测后的状态向量协方差矩阵。
 
 ```
-假设我们知道一个对象的当前位置和速度为x。 我们可以预测物体在Δt之后的状态，因为我们知道Δt前的物体位置和速度，我们可以假设物体保持相同的速度在运动。 
-利用x'= Fx +ν函数做预测计算。 但也许对象没有保持完全相同的速度，也许物体改变方向，加速或减速。 所以当我们预测Δt后的状态时，状态P的不确定性就会增加为P'。
+假设我们知道一个对象的当前位置和速度为x。 我们可以预测物体在Δt之后的状态，因为我们知道Δt前的物体位置和速度，
+我们可以假设物体保持相同的速度在运动。 利用x'= Fx +ν函数做预测计算。 但也许对象没有保持完全相同的速度，
+也许物体改变方向，加速或减速。 所以当我们预测Δt后的状态时，状态P的不确定性就会增加为P'。
 由于实际物体可能会有加速、减速，所以P'服从ν〜N（0，Q）的高斯分布，以描述这种预测的不确定性。
 ```
 * **Update**
@@ -107,6 +108,39 @@
 
 ## 数据文件描述
 
+输入文件格式：
+
+```
+#L(laser) meas_px meas_py timestamp gt_px gt_py gt_vx gt_vy
+#R(radar) meas_rho meas_phi meas_rho_dot timestamp gt_px gt_py gt_vx gt_vy
+```
+* meas_px meas_py 为激光检测物体的均值坐标
+* meas_rho meas_phi meas_rho_dot 为雷达检测物体的均值、角度、径向速度
+* timestamp 为时间戳(毫秒)
+* gt_px gt_py gt_vx gt_vy 为物体真实的坐标和速度值，此数据用于评估滤波器的准确度。
+
+输出文件格式：
+
+```$xslt
+est_px est_py est_vx est_vy meas_px meas_py gt_px gt_py gt_vx gt_vy
+```
+* est_px est_py est_vx est_vy 预测的物体坐标和速度
+* meas_px meas_py 输入文件中的物体均值坐标
+* gt_px gt_py gt_vx gt_vy 为物体真实的坐标和速度值，此数据用于评估滤波器的准确度。
+
 ## 代码简述
 
 ### 代码依赖
+
+* EIGEN3 Library
+* cmake >= 3.5
+* make >= 4.1
+* gcc/g++ >= 5.4
+
+### 构建&运行
+
+1. 克隆代码：https://github.com/fy2462/kalman.git
+2. 创建build文件夹：```mkdir build && cd build```
+3. 编译文件：```cmake .. && make```
+    * windows上需运行: ```cmake .. -G "Unix Makefiles" && make```
+4. 运行：```./ExtendedKF ../data/data_in.txt ../data/data_out.txt```
