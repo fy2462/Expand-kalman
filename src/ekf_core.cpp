@@ -24,7 +24,7 @@ EKFCore::EKFCore() : is_initialized_(false),
                 0, 0.0225;
 
     H_laser_ << 1, 0, 0, 0,
-            0, 1, 0, 0;
+                0, 1, 0, 0;
 
     R_radar_ << 0.09, 0, 0,
                 0, 0.0009, 0,

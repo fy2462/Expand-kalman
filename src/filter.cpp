@@ -29,6 +29,7 @@ void KalmanFilter::Predict() {
 
 void KalmanFilter::Update(const VectorXd &z) {
     VectorXd y = VectorXd(2);
+    // 残差
     y = z - H_ * x_;
 
     MatrixXd PHt = P_ * H_.transpose();

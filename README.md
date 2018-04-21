@@ -16,7 +16,7 @@
    
 ### 计算流程
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/prediction-update.jpg)
+![image](./image/prediction-update.jpg)
 
 ### 变量定义
 **x** 是状态向量。包含追踪对象的位置和速度信息，服从高斯分布。
@@ -29,7 +29,7 @@
 
 * **Prediction**
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/kalman-prediction.jpg)
+![image](./image/kalman-prediction.jpg)
 
 **x'** 预测后的状态向量分布均值。
 
@@ -43,7 +43,7 @@
 ```
 * **Update**
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/kalman-update.jpg)
+![image](./image/kalman-update.jpg)
 
 ```
 在得到带有误差的传感器数据z后，首先我们和预测结果x'进行对比y = z-Hx', 其中H为线性转换矩阵。
@@ -56,12 +56,12 @@
 有时我们采集的数据来自多种传感器，其中有些传感器数据和噪声并不服从高斯分布，由于高斯分布经过非线性变换后，不再是高斯分布，所以到时上述的kalman方程无法递推下去。
 于是EKF使用高斯分布的近似去模拟非线性数据，并在k时刻进行线性计算。
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/ekf-eqution.jpg)
+![image](./image/ekf-eqution.jpg)
 
 这是在k处的1阶泰勒展开，以近似模拟k-1到k的非线性变化。
 下图为扩展kalman与传统kalman在计算上的区别：
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/efk.jpg)
+![image](./image/efk.jpg)
 
 其中：**x'=f(x,u)** 为k-1出的先验数据(u=0)，h(x')为非线性转换函数转换后的预测值。Hj为雅可比矩阵，是一阶泰勒展开的系数矩阵。
 
@@ -71,14 +71,14 @@
 激光雷达返回的数据通常是点云数据(x,y,z)，本示例所输入的激光数据是经过转换后的物体中心坐标和速度2维向量等物体运动状态。
 所以我们建立预测数据等式：
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/linaer-conversation.jpg)
+![image](./image/linaer-conversation.jpg)
 
 ```$xslt
 其中预测噪声示例中忽略为0，读者可以后续添加高斯随机噪声。
 ```
 同时运动状态方程的噪声协方差为：
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/gaussian-distribution.jpg)
+![image](./image/gaussian-distribution.jpg)
 
 随后通过计算kalman增益K, 对预测的状态向量进行调整，得出最终的预测xk和Pk。
 
@@ -88,7 +88,7 @@
 但是雷达数据往往只会得到距离和角度，并且与激光雷达数据是无法线性转换的，所以这就需要设计一个新的卡尔曼滤波方程。
 雷达返回的数据如下所示：
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/radar-data.jpg)
+![image](./image/radar-data.jpg)
 
 **ρ** 与观测障碍物的距离。
 
@@ -98,11 +98,11 @@
 
 我们需要将先验的数据先从极坐标转换为笛卡尔坐标。
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/hx.jpg)
+![image](./image/hx.jpg)
 
 观察发现，这个转换过程并不是一个线性转换。然后我们计算雅可比矩阵Hj：
 
-![image](https://github.com/fy2462/Expand-kalman/blob/master/image/jacobian.jpg)
+![image](./image/jacobian.jpg)
 
 其余与传统kalman过程类似，最终我们得到k时刻的xk和Pk。
 
@@ -144,3 +144,11 @@ est_px est_py est_vx est_vy meas_px meas_py gt_px gt_py gt_vx gt_vy
 3. 编译文件：```cmake .. && make```
     * windows上需运行: ```cmake .. -G "Unix Makefiles" && make```
 4. 运行：```./ExtendedKF ../data/data_in.txt ../data/data_out.txt```
+
+## RMSE
+
+最终对真实值和评估值进行RMSE, 输出如下:
+
+![image](./image/RMSE.png)
+
+可以评估出定位RMSE在0.14左右，速度RMSE在0.47左右。
